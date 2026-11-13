@@ -31,6 +31,10 @@ export default async (req) => {
   const store = getStore({ name: "shortage-dashboard", consistency: "strong" });
 
   if (req.method === "GET") {
+    if (new URL(req.url).searchParams.get("meta") === "1") {   // cek ringan untuk auto refresh
+      const m = (await store.get("meta", { type: "json" })) || {};
+      return json(200, { updated: m.updated || null, count: m.count || 0 });
+    }
     const buf = await store.get("data.gz", { type: "arrayBuffer" });
     if (!buf) return new Response(null, { status: 204, headers: { "cache-control": "no-store" } });
     const meta = (await store.get("meta", { type: "json" })) || {};
